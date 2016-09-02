@@ -1,0 +1,20 @@
+{
+    "name": "syrp-nz/silverstripe-cloudlfare-purger",
+    "description": "Simple Silverstripe plugin to automatically purge pages from CloudFlare on save.",
+    "type": "silverstripe-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maxime Rainville",
+            "email": "maxime@rainville.me"
+        }
+    ],
+    "prefere-stable": true,
+    "minimum-stability": "dev",
+    "require": {
+        "jamesryanbell/cloudflare": "^1.7"
+    },
+    "extra": {
+	   "installer-name": "cloudflare-purger"
+    }
+}

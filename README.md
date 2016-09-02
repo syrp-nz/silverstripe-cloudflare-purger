@@ -1,2 +1,2 @@
 # silverstripe-cloudflare-purger
-Simple plugin to automatically purge pages from CloudFlare on save.
+Simple Silverstripe plugin to automatically purge pages from CloudFlare on save.
