@@ -1,0 +1,6 @@
+SiteConfig:
+  extensions:
+    - CloudflareSiteConfigExtension
+SiteTree:
+  extensions:
+    - CloudFlarePurgerExtension
