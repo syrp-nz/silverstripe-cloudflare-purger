@@ -56,6 +56,11 @@ class CloudflarePurger extends Object
         // Get the path value
         $paths = self::getConfigValue('Paths');
 
+        // We don't explicitely define a path, return an mepty array.
+        if (!$paths) {
+            return [];
+        }
+
         // Make sure we're workign with an array
         if (!is_array($paths)) {
             $paths = explode("\n",$paths);
@@ -86,10 +91,12 @@ class CloudflarePurger extends Object
         }
 
         // Site Config
-        $siteConfig = SiteConfig::current_site_config();
-        $siteconfigValueName = 'Cloudflare' . $valueName;
-        if ($siteConfig->$siteconfigValueName) {
-            return $siteConfig->$siteconfigValueName;
+        if (!$config->HideSiteConfig) {
+            $siteConfig = SiteConfig::current_site_config();
+            $siteconfigValueName = 'Cloudflare' . $valueName;
+            if ($siteConfig->$siteconfigValueName) {
+                return $siteConfig->$siteconfigValueName;
+            }
         }
 
         return '';
@@ -171,6 +178,7 @@ class CloudflarePurger extends Object
 
         // Get Path to apply to links
         $paths = self::getPaths();
+
         if (empty($paths)) {
             // Default to the site's absolute path if our list is empty.
             $paths = [Director::absoluteBaseURL()];
