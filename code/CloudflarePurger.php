@@ -115,7 +115,6 @@ class CloudflarePurger extends Object
         if ($email && $authKey && $zoneId) {
             $zoneClient = new Cache($email, $authKey);
             $purgeList = self::buildPurgeList($links);
-            var_dump($purgeList);die();
             $zoneClient->purge_files($zoneId, $purgeList);
         }
 
@@ -132,7 +131,7 @@ class CloudflarePurger extends Object
 
         foreach ($paths as $path) {
             foreach ($links as $link) {
-                $list[] = $path . $link;
+                $list[] = $path . ltrim($link, '/');
             }
         }
 
