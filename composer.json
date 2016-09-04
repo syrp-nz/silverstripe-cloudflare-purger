@@ -12,7 +12,8 @@
     "prefere-stable": true,
     "minimum-stability": "dev",
     "require": {
-        "jamesryanbell/cloudflare": "^1.7"
+        "jamesryanbell/cloudflare": "^1.7",
+        "silverstripe/cms": "^3.1"
     },
     "extra": {
 	   "installer-name": "cloudflare-purger"
