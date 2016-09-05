@@ -188,7 +188,12 @@ class CloudflarePurger extends Object
         foreach ($paths as $path) {
             // Loop over all the relative links.
             foreach ($links as $link) {
-                $list[] = $path . ltrim($link, '/');
+                // Remove any slashes at the start or the end of the string.
+                $link = trim($link, '/');
+                // Add the link without the trailing slash
+                $list[] = $path . $link;
+                // Add the link with the trailing slash
+                $list[] = $path . $link . '/';
             }
         }
 
