@@ -4,7 +4,7 @@
  * This Extension can be applied to DataObjects that are accessible via a URL or that are associated to an object is
  * reachable via a URL.
  */
-class CloudFlarePurgerExtension extends DataExtension
+class CloudflarePurgerExtension extends DataExtension
 {
 
     /**

@@ -3,4 +3,4 @@ SiteConfig:
     - CloudflareSiteConfigExtension
 SiteTree:
   extensions:
-    - CloudFlarePurgerExtension
+    - CloudflarePurgerExtension
