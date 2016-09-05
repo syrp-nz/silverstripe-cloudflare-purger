@@ -48,24 +48,24 @@ If your concerned about your `AuthKey` key being visible in the site configurati
 ## How does the plugin work
 The plugin defines a `CloudflarePurgerExtension` DataExtension.This extension can be applied to any DataObject class. It will automatically be applied to the `SiteTree` class.
 
-If the DataObject supports versionning, a call will be made to the Cloudflare API to attempt to purge the the URLs associated to this object. If the DataObject doesn't support versionning, the purge call will occur after each write.
+If the DataObject supports versioning, a call will be made to the Cloudflare API to attempt to purge the the URLs associated to this object. If the DataObject doesn't support versioning, the purge call will occur after each write.
 
 The DataObject can expose a `CloudflarePurgeLinks()` method to specify which URLs should be purged. This method can return either a single URL or array of URLs. The URLs should be relative to the site root.
 
 Otherwise, the `Link()` method will be called on your DataObject.
 
 ### Applying `CloudflarePurgerExtension` to a DataObject
-If you have a Page type that relies on child DataObject for their content or if your DataObject is accessible via it's own URL, you should make sure to implement the `CloudflarePurgerExtension` on them.
+If you have a Page type that relies on a child DataObject for its content or if your DataObject is accessible via its own URL, you should implement the `CloudflarePurgerExtension` on it.
 
 You can do so via a YML file.
 
 ```YML
 PromoDataObject:
   extensions:
-    - CloudFlarePurgerExtension
+    - CloudflarePurgerExtension
 ```
 
-Here's how you could customise the URLs that get purge when the `PromoDataObject` get saved.
+Here's how you could customise the URLs that get purged when the `PromoDataObject` gets saved.
 
 ```php
 class PromoDataObject extends DataObject {
@@ -80,14 +80,16 @@ class PromoDataObject extends DataObject {
 
     public function Link()
     {
-        // This DO can be access as a sub-action on the controller of its parent page through its ID.
-        // If `CloudflarePurgeLinks` wasn't define, the individual URL of this DO would be purge, but not its parent.
+        // This DO can be accessed as a sub-action on the controller of its parent page through its ID.
+        // If `CloudflarePurgeLinks` wasn't defined, the individual URL of this DO would be purge, but
+        // not its parent.
         return $this->Parent()->Link($this->ID);
     }
 
     public function CloudflarePurgeLinks()
     {
-        // The content of this DO is used when rendering the parent page. So when this DO is save, we want to purge the parent's page URL as well.
+        // The content of this DO is used when rendering the parent page. So when this DO is saved, we
+        // want to purge the parent's page URL as well.
         return [$this->Link(), $this->Parent()->Link()];
     }
 
