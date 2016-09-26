@@ -38,11 +38,41 @@ class CloudflarePurgerExtension extends DataExtension
      */
     public function onAfterWrite()
     {
+        if ($this->owner)
+
         if ($this->owner->hasExtension('Versioned')) {
             $this->purge(self::PURGE_DRAFT);
         } else {
             $this->purge(self::PURGE_LIVE);
         }
+    }
+
+    /**
+     * Purge the object after its been deleted.
+     */
+    public function onAfterDelete()
+    {
+        if ($this->owner->hasExtension('Versioned')) {
+            $this->purge(self::PURGE_ALL);
+        } else {
+            $this->purge(self::PURGE_LIVE);
+        }
+    }
+
+    /**
+     * Detech alteration that will invalidate the site navigation.
+     * @return boolean
+     */
+    protected function detectNavChange()
+    {
+        $changed = $this->owner->changed;
+
+        return
+            isset($changed['ShowInMenus']) ||
+            isset($changed['Sort']) ||
+            isset($changed['ParentID']) ||
+            isset($changed['URLSegment'])||
+            isset($changed['MenuTitle']);
     }
 
     /**
