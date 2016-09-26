@@ -48,11 +48,13 @@ If your concerned about your `AuthKey` key being visible in the site configurati
 ## How does the plugin work
 The plugin defines a `CloudflarePurgerExtension` DataExtension.This extension can be applied to any DataObject class. It will automatically be applied to the `SiteTree` class.
 
-If the DataObject supports versioning, a call will be made to the Cloudflare API to attempt to purge the the URLs associated to this object. If the DataObject doesn't support versioning, the purge call will occur after each write.
+If the DataObject supports versioning, a call will be made to the Cloudflare API on publication to attempt to purge the the URLs associated to this object. If the DataObject doesn't support versioning, the purge call will occur after each write.
 
 The DataObject can expose a `CloudflarePurgeLinks()` method to specify which URLs should be purged. This method can return either a single URL or array of URLs. The URLs should be relative to the site root.
 
 Otherwise, the `Link()` method will be called on your DataObject.
+
+The plugin also attempts to detect when your site navigation changes. Site navigation changes will cause your entire CloudFlare zone to be purge.
 
 ### Applying `CloudflarePurgerExtension` to a DataObject
 If you have a Page type that relies on a child DataObject for its content or if your DataObject is accessible via its own URL, you should implement the `CloudflarePurgerExtension` on it.
@@ -94,5 +96,4 @@ class PromoDataObject extends DataObject {
     }
 
 }
-
 ```
