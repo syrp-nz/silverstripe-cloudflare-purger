@@ -8,12 +8,28 @@ class CloudflarePurgerExtension extends DataExtension
 {
 
     /**
+     * Bit mask for purging the draft site.
+     */
+    const PURGE_DRAFT = 0b01;
+
+    /**
+     * Bit mask for purging the live version of the site.
+     */
+    const PURGE_LIVE = 0b10;
+
+    /**
+     * Bit mask for purging the both the draft and live version of the site.
+     */
+    const PURGE_ALL = 0b11;
+
+
+    /**
      * This hook will be called on objects that have the `Versioned` extension applied on the them before a new version
      * is published.
      */
     public function onBeforeVersionedPublish()
     {
-        $this->purge();
+        $this->purge(self::PURGE_LIVE);
     }
 
     /**
@@ -22,15 +38,19 @@ class CloudflarePurgerExtension extends DataExtension
      */
     public function onAfterWrite()
     {
-        if (!$this->owner->hasExtension('Versioned')) {
-            $this->purge();
+        if ($this->owner->hasExtension('Versioned')) {
+            $this->purge(self::PURGE_DRAFT);
+        } else {
+            $this->purge(self::PURGE_LIVE);
         }
     }
 
     /**
      * Try to purge URLs from Cloudflare for this DataObject.
+     *
+     * @param int $purgeMask What we should purge
      */
-    protected function purge()
+    protected function purge($purgeMask = self::PURGE_LIVE)
     {
         // Get the links to purge
         $links = $this->getPurgeLinks();
@@ -38,10 +58,46 @@ class CloudflarePurgerExtension extends DataExtension
         // If we have URLs, proceed with purge.
         if ($links) {
             try {
-                CloudflarePurger::purge($links);
+                if ($purgeMask & self::PURGE_LIVE) {
+                    CloudflarePurger::purge($links);
+                }
+
+                if ($purgeMask & self::PURGE_DRAFT) {
+                    $this->convertToStageUrl($links);
+                    CloudflarePurger::purge($links);
+                }
             } catch (Exception $ex) {
                 SS_Log::log($ex->getMessage(), SS_Log::NOTICE);
             }
+        }
+    }
+
+    /**
+     * Add a the stage parameter at the end of the URLs to purge. Will work even if there's an existing URL parameter
+     * on the links.
+     * @param  string[] $links
+     * @see http://stackoverflow.com/questions/5809774/manipulate-a-url-string-by-adding-get-parameters
+     */
+    protected function convertToStageUrl(&$links)
+    {
+        foreach ($links as &$link) {
+            // Parse the URL into it's sub commponent
+            $parts = parse_url($link);
+
+            if (isset($parts['query'])) {
+                parse_str($parts['query'], $params);
+            } else {
+                $params = [];
+            }
+
+            // Set the stage parameter
+            $params['stage'] = 'Stage';
+
+            // Rebuild the query part of the URL
+            $parts['query'] = http_build_query($params);
+
+            // Reasseble the link
+            $link = $parts['path'] . '?' . $parts['query'];
         }
     }
 
