@@ -1,7 +1,7 @@
 # 0.1.0
 ## 2016-09-27
 * Added a `purgeEverything` function to CloudflarePurger.
-
+* Tweak CloudflarePurgerExtension to detect navigation changes and trigger a full purge.
 
 ## 2016-09-26
 * Add logic to Purge draft of pages.

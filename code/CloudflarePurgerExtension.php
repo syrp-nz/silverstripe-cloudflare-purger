@@ -22,6 +22,17 @@ class CloudflarePurgerExtension extends DataExtension
      */
     const PURGE_ALL = 0b11;
 
+    /**
+     * List of fields that are likely to invalidate the site navigation and to require a full website purge.
+     * @var string[]
+     */
+    protected $navChangeFields = [
+        'ShowInMenus',
+        'Sort',
+        'ParentID',
+        'URLSegment',
+        'MenuTitle'
+    ];
 
     /**
      * This hook will be called on objects that have the `Versioned` extension applied on the them before a new version
@@ -29,7 +40,11 @@ class CloudflarePurgerExtension extends DataExtension
      */
     public function onBeforeVersionedPublish()
     {
-        $this->purge(self::PURGE_LIVE);
+        if ($this->detectVersionedNavChange()) {
+            CloudflarePurger::purgeEverything();
+        } else {
+            $this->purge(self::PURGE_LIVE);
+        }
     }
 
     /**
@@ -38,12 +53,14 @@ class CloudflarePurgerExtension extends DataExtension
      */
     public function onAfterWrite()
     {
-        if ($this->owner)
-
         if ($this->owner->hasExtension('Versioned')) {
             $this->purge(self::PURGE_DRAFT);
         } else {
-            $this->purge(self::PURGE_LIVE);
+            if ($this->detectNavChange()) {
+                CloudflarePurger::purgeEverything();
+            } else {
+                $this->purge(self::PURGE_LIVE);
+            }
         }
     }
 
@@ -52,7 +69,9 @@ class CloudflarePurgerExtension extends DataExtension
      */
     public function onAfterDelete()
     {
-        if ($this->owner->hasExtension('Versioned')) {
+        if (isset($this->owner->ShowInMenu) && $this->owner->ShowInMenu) {
+            CloudflarePurger::purgeEverything();
+        } elseif ($this->owner->hasExtension('Versioned')) {
             $this->purge(self::PURGE_ALL);
         } else {
             $this->purge(self::PURGE_LIVE);
@@ -60,19 +79,39 @@ class CloudflarePurgerExtension extends DataExtension
     }
 
     /**
-     * Detech alteration that will invalidate the site navigation.
+     * Detect alteration to a Versionned Data object that are likely to invalidate the site navigation and require a full purge.
+     * @return boolean
+     */
+    protected function detectVersionedNavChange()
+    {
+        $live = Versioned::get_by_stage($this->owner->getClassName(), 'Live')->byID($this->owner->ID);
+        $stage = Versioned::get_by_stage($this->owner->getClassName(), 'Stage')->byID($this->owner->ID);
+
+        if (!$live || !$stage) {
+            return true;
+        }
+
+        $diff = new DataDifferencer($live, $stage);
+
+        $changedFields = $diff->changedFieldNames();
+
+        return !empty(array_intersect($changedFields, $this->navChangeFields));
+
+    }
+
+    /**
+     * Detect alteration that will invalidate the site navigation and require a complete purge of the site.
      * @return boolean
      */
     protected function detectNavChange()
     {
-        $changed = $this->owner->changed;
+        foreach ($this->navChangeFields as $fieldName) {
+            if ($this->owner->isChanged($fieldName)) {
+                return true;
+            }
+        }
 
-        return
-            isset($changed['ShowInMenus']) ||
-            isset($changed['Sort']) ||
-            isset($changed['ParentID']) ||
-            isset($changed['URLSegment'])||
-            isset($changed['MenuTitle']);
+        return false;
     }
 
     /**
