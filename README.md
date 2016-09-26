@@ -14,7 +14,14 @@ _NB_: The plugin has been tested against Silverstripe 3.4 but has not been torou
 composer require syrp-nz/silverstripe-cloudlfare-purger "^0.0"
 ```
 
-## Configuration
+## Getting CloudFlare to cache your content
+This plugin doesn't automatically configure SilverStripe or CloudFlare to automatically cache your web content.
+
+Before installaing the plugin, you'll need to configure your SilverStripe site to play nice with CloudFlare.
+
+[Configuring CloudFlare to cache SilverStripe pages](https://github.com/syrp-nz/silverstripe-cloudflare-purger/wiki/Configuring-CloudFlare-to-cache-SilverStripe-pages)
+
+## Configuration the plugin
 This plugin can be configured via a YML file or via the Site Configuration page. The YML configuration will have precedence over the Site Configuration. You can use a combination of both if you want.
 
 The following configuration options are available:
