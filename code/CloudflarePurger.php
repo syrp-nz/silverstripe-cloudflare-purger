@@ -144,9 +144,10 @@ class CloudflarePurger extends Object
      */
     public static function purge($links)
     {
+
         // $links should be an array.
         if (!is_array($links)) {
-            SS_Log::log("CloudflarePurger::purge() expects an array of links as parameter.", SS_Log::WARNING);
+            user_error("CloudflarePurger::purge() expects an array of links as parameter.", E_USER_ERROR);
             return;
         }
 
@@ -155,7 +156,7 @@ class CloudflarePurger extends Object
         $authKey = self::getAuthKey();
         $zoneId = self::getZoneIdentifier();
 
-        // If we have creads
+        // If we have creds
         if ($email && $authKey && $zoneId) {
             $zoneClient = new Cache($email, $authKey);
 
@@ -168,6 +169,27 @@ class CloudflarePurger extends Object
 
     }
 
+    /**
+     * Invalidate the entire CloudFlare cache.
+     */
+    public static function purgeEverything()
+    {
+        // Get Creds
+        $email = self::getEmail();
+        $authKey = self::getAuthKey();
+        $zoneId = self::getZoneIdentifier();
+
+        // If we have creds
+        if ($email && $authKey && $zoneId) {
+            try {
+                $zoneClient = new Cache($email, $authKey);
+                // Do the purging.
+                $zoneClient->purge($zoneId, true);
+            } catch (Exception $ex) {
+                user_error("CloudflarePurger::purgeEverything() failed to communicate with CloudFlare.", E_USER_WARNING);
+            }
+        }
+    }
     /**
      * Received a list of relative links to the site root. BUilds a list of absolute links that can be sent back to Cloudfalre.
      * @param  string[] $links
